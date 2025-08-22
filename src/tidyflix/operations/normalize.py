@@ -375,14 +375,7 @@ class TermMover(Normalize):
         "limited",
         "extended",
         "unrated",
-        "uncut",
-        "directors",
-        "cut",
         "theatrical",
-        "final",
-        "special",
-        "edition",
-        "ultimate",
         "internal",
     ]
 
