@@ -172,7 +172,7 @@ def _has_archive_files_recursive(directory_path: str) -> bool:
     try:
         for root, _dirs, files in os.walk(directory_path):
             # Check if current directory path contains "subs" (case-insensitive)
-            is_subs_dir = "subs" in root.lower()
+            is_subs_dir = "subs" in root.lower() or "subtitles" in root.lower()
             
             for file in files:
                 file_lower = file.lower()
