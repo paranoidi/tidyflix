@@ -8,6 +8,8 @@ Shamelessly vibe-coded. Any hints to media files from questionable sources are A
 
 - **Duplicate Detection**: Find and manage duplicate movie directories with quality scoring based on video format, resolution, and encoding
 - **Directory Normalization**: Clean up directory names by removing unwanted substrings and applying standard formatting
+- **Directory Verification**: Make sure directories contain at least one media file.
+- **Organize Files**: Move media files into subdirectories with same name.
 - **File Cleaning**: Remove unwanted files (`.txt`, `.exe`, `.url`) from your media directories with intelligence to leave them in BDMV.
 - **Interactive Processing**: User-friendly interface with colored output and confirmation prompts
 - **Background Scanning**: Efficient processing with background analysis for large collections
@@ -26,6 +28,8 @@ uv sync
 ## Usage Examples
 
 ### Finding and Managing Duplicates (Default Command)
+
+**Recommendation**: Run `tidyflix normalize` before duplicate detection to ensure directory names are standardized, which improves duplicate matching accuracy.
 
 The main functionality of TidyFlix is finding duplicate movie directories and helping you decide which ones to keep:
 
@@ -98,6 +102,46 @@ Removes:
 - `.exe` files
 - `.url` files
 
+### Directory Verification
+
+Verify that subdirectories contain at least one media file recursively:
+
+```bash
+# Verify current directory
+tidyflix verify
+
+# Verify specific directories
+tidyflix verify /movies /movies-4k
+
+# Delete directories without media files
+tidyflix verify --delete
+
+# Disable colored output
+tidyflix verify --no-color
+```
+
+This command helps identify empty directories that may have been left behind after cleaning or moving files.
+
+### File Organization
+
+Move media files into subdirectories based on their filenames:
+
+```bash
+# Organize current directory
+tidyflix organize
+
+# Organize specific directories
+tidyflix organize /movies /movies-4k
+
+# Preview changes without applying them
+tidyflix organize --dry-run
+
+# Disable colored output
+tidyflix organize --no-color
+```
+
+This command takes loose media files and creates subdirectories with the same name (minus extension), then moves the files into those directories. Useful for organizing downloads that come as individual files rather than in folders.
+
 ## Command Reference
 
 ### Main Command (Duplicate Detection)
@@ -129,6 +173,26 @@ tidyflix clean [options] [directories...]
 - `--dry-run`: Preview deletions without removing files
 - `--no-color`: Disable colored output
 - `-h, --help`: Show help for clean command
+
+### Verify Subcommand
+```bash
+tidyflix verify [options] [directories...]
+```
+
+**Options:**
+- `--delete`: Delete directories that don't contain media files
+- `--no-color`: Disable colored output
+- `-h, --help`: Show help for verify command
+
+### Organize Subcommand
+```bash
+tidyflix organize [options] [directories...]
+```
+
+**Options:**
+- `--dry-run`: Preview changes without applying them
+- `--no-color`: Disable colored output
+- `-h, --help`: Show help for organize command
 
 ## Quality Scoring System
 
