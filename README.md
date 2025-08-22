@@ -70,6 +70,9 @@ tidyflix normalize --dry-run
 # Show detailed explanation of each change
 tidyflix normalize --explain
 
+# Automatically accept deletions (non-interactive mode)
+tidyflix normalize -y
+
 # Disable colored output
 tidyflix normalize --no-color
 ```
@@ -78,6 +81,26 @@ Example transformations:
 - `Movie.Name.2023.1080p.BluRay.x264-GROUP` → `Movie Name (2023)`
 - `Another_Movie_2022_4K_HDR_x265` → `Another Movie (2022)`
 - `[Release.Group].Movie.Title.2021.2160p.UHD` → `Movie Title (2021)`
+
+#### Intelligent Conflict Resolution
+
+When normalizing results in a naming conflict (two directories would have the same name), TidyFlix uses intelligent logic to determine which directory to keep:
+
+1. **Media Priority**: If only one directory contains media files, the empty directory is automatically deleted
+2. **Size Comparison**: If both directories have media files (or both are empty), the smaller directory is deleted
+3. **Clear Analysis**: Shows detailed reasoning before taking action
+
+Example conflict resolution:
+```
+Directory conflict detected!
+Source:      'Movie.Title.2023.1080p.x264' -> (1.2 GB, 15 files, 2 subdirectories)
+Destination: 'Movie Title (2023)' -> (890.5 MB, 8 files, 1 subdirectories)
+
+Intelligent deletion analysis:
+  Source has media files: True
+  Destination has media files: False
+  → Deleting destination (no media files)
+```
 
 ### File Cleaning
 
@@ -161,6 +184,7 @@ tidyflix normalize [options] [directories...]
 **Options:**
 - `--dry-run`: Preview changes without applying them
 - `-e, --explain`: Show detailed steps for each transformation
+- `-y, --yes`: Automatically accept deletions without prompting (for non-interactive use)
 - `--no-color`: Disable colored output
 - `-h, --help`: Show help for normalize command
 
