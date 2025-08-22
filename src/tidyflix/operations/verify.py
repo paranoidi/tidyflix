@@ -160,7 +160,7 @@ def _has_media_files_recursive(directory_path: str) -> bool:
 def _has_archive_files_recursive(directory_path: str) -> bool:
     """
     Check if a directory or any of its subdirectories contains archive files (rar, par2).
-    
+
     Excludes .rar files in directories containing "subs" (case-insensitive) as these
     are typically subtitle archives.
 
@@ -173,7 +173,7 @@ def _has_archive_files_recursive(directory_path: str) -> bool:
         for root, _dirs, files in os.walk(directory_path):
             # Check if current directory path contains "subs" (case-insensitive)
             is_subs_dir = "subs" in root.lower() or "subtitles" in root.lower()
-            
+
             for file in files:
                 file_lower = file.lower()
                 if file_lower.endswith(".par2"):

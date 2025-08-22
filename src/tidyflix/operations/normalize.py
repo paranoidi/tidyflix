@@ -365,6 +365,72 @@ class TermCapitalizer(Normalize):
         return ".".join(parts)
 
 
+class TermMover(Normalize):
+    """Moves specific terms after the year in the filename."""
+
+    TERMS_TO_MOVE: list[str] = [
+        "proper",
+        "repack",
+        "rerip",
+        "limited",
+        "extended",
+        "unrated",
+        "uncut",
+        "directors",
+        "cut",
+        "theatrical",
+        "final",
+        "special",
+        "edition",
+        "ultimate",
+        "internal",
+    ]
+
+    @override
+    def normalize(self, text: str) -> str:
+        if not text:
+            return text
+
+        parts = text.split(".")
+
+        # Find the year part
+        year_index = None
+        for i, part in enumerate(parts):
+            if re.search(r"^\d{4}$", part):
+                year_index = i
+                break
+
+        # If no year found, return original text
+        if year_index is None:
+            return text
+
+        # Find terms to move (before year)
+        terms_to_move = []
+        indices_to_remove = []
+
+        for i in range(year_index):
+            part = parts[i]
+            if part.lower() in [term.lower() for term in self.TERMS_TO_MOVE]:
+                terms_to_move.append(part)
+                indices_to_remove.append(i)
+
+        # If no terms to move, return original text
+        if not terms_to_move:
+            return text
+
+        # Remove the terms from their original positions (reverse order to maintain indices)
+        for i in reversed(indices_to_remove):
+            parts.pop(i)
+            # Adjust year_index since we removed items before it
+            year_index -= 1
+
+        # Insert terms after the year
+        for i, term in enumerate(terms_to_move):
+            parts.insert(year_index + 1 + i, term)
+
+        return ".".join(parts)
+
+
 class LeadingDotNormalizer(Normalize):
     """Removes leading dots."""
 
