@@ -63,6 +63,7 @@ class NormalizeArgs(BaseCommandArgs):
 
     dry_run: bool = False
     explain: bool = False
+    auto_accept: bool = False
 
 
 @dataclass
@@ -162,6 +163,7 @@ Examples:
   %(prog)s /movies /movies-4k      # Normalize directories in multiple paths
   %(prog)s --dry-run               # Preview changes without applying them
   %(prog)s -e                      # Show detailed cleaning steps (with colors)
+  %(prog)s -y                      # Automatically accept deletions (non-interactive)
   %(prog)s --no-color              # Disable colored output
         """,
     )
@@ -188,6 +190,13 @@ Examples:
 
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")
 
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Automatically accept deletions without prompting (for non-interactive use)",
+    )
+
     args = parser.parse_args()
 
     return NormalizeArgs(
@@ -195,6 +204,7 @@ Examples:
         no_color=args.no_color,
         dry_run=args.dry_run,
         explain=args.explain,
+        auto_accept=args.yes,
     )
 
 
@@ -232,7 +242,10 @@ def main_normalize():
     target_dirs = _validate_and_setup_common(args)
 
     success = normalize_directories(
-        target_directories=target_dirs, dry_run=args.dry_run, explain=args.explain
+        target_directories=target_dirs,
+        dry_run=args.dry_run,
+        explain=args.explain,
+        auto_accept=args.auto_accept,
     )
     if not success:
         sys.exit(1)

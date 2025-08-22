@@ -5,6 +5,7 @@ from __future__ import annotations
 import difflib
 import os
 import re
+import shutil
 import tempfile
 from abc import ABC, ABCMeta, abstractmethod
 
@@ -13,8 +14,10 @@ from typing_extensions import override
 from tidyflix.core.models import Colors
 from tidyflix.core.utils import (
     get_directory_info,
+    get_directory_size,
     validate_directory,
 )
+from tidyflix.operations.verify import _has_media_files_recursive
 
 
 def highlight_changes(original: str, modified: str) -> tuple[str, str]:
@@ -403,6 +406,42 @@ def is_case_insensitive_filesystem(directory: str) -> bool:
         return False
 
 
+def determine_directory_to_delete(source_path: str, destination_path: str) -> str:
+    """
+    Determine which directory to delete when there's a name conflict.
+
+    Rules:
+    1. If only one directory has media files, delete the one without media
+    2. If both have media files, delete the smaller one (by total size)
+    3. If neither has media files, delete the smaller one
+
+    Args:
+        source_path: Path to the source directory (being renamed)
+        destination_path: Path to the existing destination directory
+
+    Returns:
+        Path to the directory that should be deleted
+    """
+    source_has_media = _has_media_files_recursive(source_path)
+    dest_has_media = _has_media_files_recursive(destination_path)
+
+    # If only one has media files, delete the one without media
+    if source_has_media and not dest_has_media:
+        return destination_path
+    elif dest_has_media and not source_has_media:
+        return source_path
+
+    # Both have media files (or both don't), compare sizes
+    source_size = get_directory_size(source_path)
+    dest_size = get_directory_size(destination_path)
+
+    # Delete the smaller directory
+    if source_size <= dest_size:
+        return source_path
+    else:
+        return destination_path
+
+
 def check_case_only_rename_safety(old_path: str, new_path: str, directory: str) -> bool:
     """
     Check if a case-only rename is safe to perform.
@@ -421,7 +460,10 @@ def check_case_only_rename_safety(old_path: str, new_path: str, directory: str) 
 
 
 def normalize_directories(
-    target_directories: list[str] | None = None, dry_run: bool = False, explain: bool = False
+    target_directories: list[str] | None = None,
+    dry_run: bool = False,
+    explain: bool = False,
+    auto_accept: bool = False,
 ):
     """Normalize directory names by applying string normalization rules."""
     if target_directories is None:
@@ -479,21 +521,64 @@ def normalize_directories(
                     print("\nDirectory conflict detected!")
                     print(f"Source:      '{dir_name}' -> ({get_directory_info(old_path)})")
                     print(f"Destination: '{new_dir_name}' -> ({get_directory_info(new_path)})")
-                    print("\nThe destination directory already exists.")
-                    response = (
-                        input(
-                            f'Delete existing "{new_dir_name}" and replace with "{dir_name}"? [Y/n]: '
+
+                    # Determine which directory should be deleted based on media content and size
+                    directory_to_delete = determine_directory_to_delete(old_path, new_path)
+
+                    source_has_media = _has_media_files_recursive(old_path)
+                    dest_has_media = _has_media_files_recursive(new_path)
+
+                    # Explain the decision
+                    print("\nIntelligent deletion analysis:")
+                    print(f"  Source has media files: {source_has_media}")
+                    print(f"  Destination has media files: {dest_has_media}")
+
+                    if source_has_media != dest_has_media:
+                        # One has media, one doesn't
+                        if directory_to_delete == new_path:
+                            print("  → Deleting destination (no media files)")
+                        else:
+                            print("  → Deleting source (no media files)")
+                    else:
+                        # Both have media or both don't - size comparison
+                        source_size = get_directory_size(old_path)
+                        dest_size = get_directory_size(new_path)
+                        print(f"  Source size: {source_size:,} bytes")
+                        print(f"  Destination size: {dest_size:,} bytes")
+                        if directory_to_delete == new_path:
+                            print("  → Deleting destination (smaller/equal size)")
+                        else:
+                            print("  → Deleting source (smaller/equal size)")
+
+                    if auto_accept:
+                        print(f"Auto-accepting deletion of: {directory_to_delete}")
+                        response = "y"
+                    else:
+                        dir_to_delete_name = os.path.basename(directory_to_delete)
+                        response = (
+                            input(
+                                f'Delete "{dir_to_delete_name}" as determined by analysis? [Y/n]: '
+                            )
+                            .strip()
+                            .lower()
                         )
-                        .strip()
-                        .lower()
-                    )
+
                     if response == "n":
                         print(f"Skipped: {old_path}")
                         continue
-                    print(f"Deleting existing directory: {new_path}")
-                    import shutil
 
-                    shutil.rmtree(new_path)
+                    # Handle the deletion and rename logic
+                    if directory_to_delete == new_path:
+                        # Delete destination, then rename source
+                        print(f"Deleting destination directory: {new_path}")
+                        shutil.rmtree(new_path)
+                        # Continue with normal rename below
+                    else:
+                        # Delete source, skip rename
+                        print(f"Deleting source directory: {old_path}")
+                        shutil.rmtree(old_path)
+                        print(f"Kept existing destination: {new_path}")
+                        continue
                 else:
                     print(f"Error: Cannot rename {old_path} -> {new_path} (file exists)")
                     continue
