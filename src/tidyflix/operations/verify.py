@@ -100,23 +100,25 @@ def _process_directory(root_path: str, delete: bool = False) -> tuple[int, int, 
         # Check if this subdirectory (and its contents) has any media files
         has_media = _has_media_files_recursive(subdir_path)
 
-        if has_archives:
-            print(f"  {Colors.YELLOW}⚠ Contains archive files: {subdir_name}{Colors.RESET}")
+        if has_archives and has_media:
+            print(f"  {Colors.YELLOW}⚠ Contains archives: {subdir_name}{Colors.RESET}")
             warning_count += 1
 
         if not has_media:
-            # Don't delete directories with archive files, even with --delete flag
-            if delete and not has_archives:
+            if delete:
                 try:
                     shutil.rmtree(subdir_path)
-                    print(f"  {Colors.RED}✗ Deleted: {subdir_name}{Colors.RESET}")
+                    if has_archives:
+                        print(f"  {Colors.RED}✗ Deleted (only archives): {subdir_name}{Colors.RESET}")
+                    else:
+                        print(f"  {Colors.RED}✗ Deleted: {subdir_name}{Colors.RESET}")
                     empty_count += 1
                 except OSError as e:
                     print(f"  {Colors.RED}✗ Failed to delete {subdir_name}: {e}{Colors.RESET}")
                     empty_count += 1
             else:
                 if has_archives:
-                    print(f"  {Colors.YELLOW}⚠ No media files (protected due to archives): {subdir_name}{Colors.RESET}")
+                    print(f"  {Colors.RED}✗ No media files (has archives): {subdir_name}{Colors.RESET}")
                 else:
                     print(f"  {Colors.RED}✗ No media files: {subdir_name}{Colors.RESET}")
                 empty_count += 1

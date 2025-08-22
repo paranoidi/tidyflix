@@ -145,6 +145,20 @@ tidyflix verify --no-color
 
 This command helps identify empty directories that may have been left behind after cleaning or moving files.
 
+#### Archive File Detection
+
+The verify command provides special handling for directories containing archive files (`.rar`, `.par2`):
+
+- **Directories with media + archives**: Shows yellow warning but protects from deletion
+- **Directories with only archives (no media)**: Shows red error and can be deleted with `--delete`
+
+Example output:
+```
+  ⚠ Contains archives: Movie.2023.BluRay.x264      # Yellow - protected (has media)
+  ✗ No media files (has archives): Old.Archive     # Red - deletable (archives only)
+  ✗ Deleted (only archives): Empty.Rar.Collection  # Red - deleted with --delete
+```
+
 ### File Organization
 
 Move media files into subdirectories based on their filenames:
