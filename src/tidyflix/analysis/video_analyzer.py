@@ -123,6 +123,10 @@ def parse_video_tags_with_score(
     if "repack" in name_lower:
         tags.append(Tag("REPACK", TAG_COLORS["REPACK"], score=TAG_SCORES["REPACK"]))
 
+    # Check for 3D (must be surrounded by space or dot)
+    if re.search(r"[\s\.]3d[\s\.]|^3d[\s\.]|[\s\.]3d$", name_lower):
+        tags.append(Tag("3D", TAG_COLORS["3D"], score=TAG_SCORES["3D"]))
+
     # Calculate tag-based score
     tag_score = sum(tag.score for tag in tags)
 

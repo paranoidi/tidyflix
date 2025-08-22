@@ -56,9 +56,11 @@ def verify_directories_have_media(target_directories: list[str], delete: bool = 
             print(f"  {Colors.RED}✗ {total_empty} directories deleted{Colors.RESET}")
         else:
             print(f"  {Colors.RED}✗ {total_empty} directories without media files{Colors.RESET}")
-    
+
     if total_warnings > 0:
-        print(f"  {Colors.YELLOW}⚠ {total_warnings} directories contain archive files (rar, par2){Colors.RESET}")
+        print(
+            f"  {Colors.YELLOW}⚠ {total_warnings} directories contain archive files (rar, par2){Colors.RESET}"
+        )
 
     return all_success
 
@@ -96,7 +98,7 @@ def _process_directory(root_path: str, delete: bool = False) -> tuple[int, int, 
 
         # Check if this subdirectory contains archive files
         has_archives = _has_archive_files_recursive(subdir_path)
-        
+
         # Check if this subdirectory (and its contents) has any media files
         has_media = _has_media_files_recursive(subdir_path)
 
@@ -109,7 +111,9 @@ def _process_directory(root_path: str, delete: bool = False) -> tuple[int, int, 
                 try:
                     shutil.rmtree(subdir_path)
                     if has_archives:
-                        print(f"  {Colors.RED}✗ Deleted (only archives): {subdir_name}{Colors.RESET}")
+                        print(
+                            f"  {Colors.RED}✗ Deleted (only archives): {subdir_name}{Colors.RESET}"
+                        )
                     else:
                         print(f"  {Colors.RED}✗ Deleted: {subdir_name}{Colors.RESET}")
                     empty_count += 1
@@ -118,7 +122,9 @@ def _process_directory(root_path: str, delete: bool = False) -> tuple[int, int, 
                     empty_count += 1
             else:
                 if has_archives:
-                    print(f"  {Colors.RED}✗ No media files (has archives): {subdir_name}{Colors.RESET}")
+                    print(
+                        f"  {Colors.RED}✗ No media files (has archives): {subdir_name}{Colors.RESET}"
+                    )
                 else:
                     print(f"  {Colors.RED}✗ No media files: {subdir_name}{Colors.RESET}")
                 empty_count += 1
@@ -163,9 +169,7 @@ def _has_archive_files_recursive(directory_path: str) -> bool:
     try:
         for _root, _dirs, files in os.walk(directory_path):
             if any(
-                file.lower().endswith(".rar")
-                or file.lower().endswith(".par2")
-                for file in files
+                file.lower().endswith(".rar") or file.lower().endswith(".par2") for file in files
             ):
                 return True
     except (PermissionError, OSError):

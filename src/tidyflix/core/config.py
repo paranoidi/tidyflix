@@ -48,6 +48,7 @@ TAG_SCORES = {
     "DV": 15,  # Dolby Vision
     "IMAX": 7,
     "REPACK": 2,
+    "3D": 0,
 }
 
 # Color assignments for tags
@@ -70,6 +71,7 @@ TAG_COLORS = {
     "1080p": Colors.YELLOW,
     # Lower quality indicators - Red
     "720p": Colors.RED,
+    "3D": Colors.RED,
 }
 
 # Default values
