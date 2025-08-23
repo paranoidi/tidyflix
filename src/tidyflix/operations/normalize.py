@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import difflib
 import os
 import re
 import shutil
@@ -11,46 +10,13 @@ from abc import ABC, ABCMeta, abstractmethod
 
 from typing_extensions import override
 
-from tidyflix.core.models import Colors
 from tidyflix.core.utils import (
     get_directory_info,
     get_directory_size,
+    highlight_changes,
     validate_directory,
 )
 from tidyflix.operations.verify import _has_media_files_recursive
-
-
-def highlight_changes(original: str, modified: str) -> tuple[str, str]:
-    """
-    Highlight changes between original and modified strings.
-    Returns a tuple of (highlighted_original, highlighted_modified).
-    """
-    if original == modified:
-        return original, modified
-
-    # Use difflib to find character-level differences
-    matcher = difflib.SequenceMatcher(None, original, modified)
-
-    highlighted_original = ""
-    highlighted_modified = ""
-
-    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-        if tag == "equal":
-            # No changes in this section
-            highlighted_original += original[i1:i2]
-            highlighted_modified += modified[j1:j2]
-        elif tag == "delete":
-            # Text was removed
-            highlighted_original += f"{Colors.RED}{original[i1:i2]}{Colors.END}"
-        elif tag == "insert":
-            # Text was added
-            highlighted_modified += f"{Colors.GREEN}{modified[j1:j2]}{Colors.END}"
-        elif tag == "replace":
-            # Text was changed
-            highlighted_original += f"{Colors.RED}{original[i1:i2]}{Colors.END}"
-            highlighted_modified += f"{Colors.GREEN}{modified[j1:j2]}{Colors.END}"
-
-    return highlighted_original, highlighted_modified
 
 
 class NormalizeMeta(ABCMeta):
@@ -644,7 +610,7 @@ def normalize_directories(
 
             os.rename(old_path, new_path)
             orig_highlighted, new_highlighted = highlight_changes(dir_name, new_dir_name)
-            print(f"  Before: '{orig_highlighted}'")
-            print(f"  After:  '{new_highlighted}'")
+            print(f"  Before: {orig_highlighted}")
+            print(f"  After : {new_highlighted}")
 
     return all_success

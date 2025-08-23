@@ -66,6 +66,19 @@ def run_verify():
         sys.argv = original_argv
 
 
+def run_filenames():
+    """Run the filename normalization process."""
+    from tidyflix.ui.cli import main_filenames
+
+    # Remove the 'filenames' subcommand from argv so filenames's argparse works normally
+    original_argv = sys.argv[:]
+    sys.argv = [sys.argv[0]] + sys.argv[2:]
+    try:
+        main_filenames()
+    finally:
+        sys.argv = original_argv
+
+
 def show_main_help():
     """Show the main help message with subcommand information."""
     print("""TidyFlix - Tidy your media collection by removing duplicates and cleaning up your files.
@@ -76,6 +89,7 @@ Usage:
   tidyflix clean [options]             # Clean unwanted files (.txt, .exe, and .url)
   tidyflix organize [options]          # Organize media files into subdirectories
   tidyflix verify [options]            # Verify subdirectories contain media files
+  tidyflix filenames [options]         # Rename main media files to match directory names
 
 Duplicate Detection (default):
   Find and manage duplicate movie directories with quality scoring.
@@ -176,11 +190,32 @@ Directory Verification:
     tidyflix verify /movies /movies-4k  # Verify subdirectories in multiple paths
     tidyflix verify --delete            # Delete directories without media files
 
+Filename Normalization:
+  Rename main media files to match their parent directory names while preserving extensions.
+
+  Usage:
+    tidyflix filenames [options] [directories...]
+
+  Arguments:
+    directories             # Directories to process (default: current directory)
+
+  Options:
+    --dry-run               # Show what would be renamed without actually doing it
+    --no-color              # Disable colored output
+    -h, --help              # Show help for filenames subcommand
+
+  Examples:
+    tidyflix filenames                     # Rename files in current directory
+    tidyflix filenames /movies             # Rename files in specified path
+    tidyflix filenames /movies /movies-4k  # Rename files in multiple paths
+    tidyflix filenames --dry-run           # Preview renames without doing them
+
 For more help on a specific subcommand:
   tidyflix normalize --help
   tidyflix clean --help
   tidyflix organize --help
-  tidyflix verify --help""")
+  tidyflix verify --help
+  tidyflix filenames --help""")
 
 
 def main():
@@ -194,6 +229,8 @@ def main():
         run_organize()
     elif len(sys.argv) > 1 and sys.argv[1] == "verify":
         run_verify()
+    elif len(sys.argv) > 1 and sys.argv[1] == "filenames":
+        run_filenames()
     elif len(sys.argv) > 1 and sys.argv[1] in ["-h", "--help"]:
         # Show main help with subcommand information
         show_main_help()
@@ -211,6 +248,9 @@ def main():
         elif len(sys.argv) > 2 and sys.argv[2] == "verify":
             sys.argv = ["tidyflix", "verify", "--help"]
             run_verify()
+        elif len(sys.argv) > 2 and sys.argv[2] == "filenames":
+            sys.argv = ["tidyflix", "filenames", "--help"]
+            run_filenames()
         else:
             show_main_help()
     else:

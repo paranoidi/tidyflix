@@ -8,6 +8,7 @@ Shamelessly vibe-coded. Any hints to media files from questionable sources are A
 
 - **Duplicate Detection**: Find and manage duplicate movie directories with quality scoring based on video format, resolution, and encoding
 - **Directory Normalization**: Clean up directory names by removing unwanted substrings and applying standard formatting
+- **Filename Normalization**: Rename media files and subtitles to match their parent directory names
 - **Directory Verification**: Make sure directories contain at least one media file.
 - **Organize Files**: Move media files into subdirectories with same name.
 - **File Cleaning**: Remove unwanted files (`.txt`, `.exe`, `.url`) from your media directories with intelligence to leave them in BDMV.
@@ -100,6 +101,69 @@ Intelligent deletion analysis:
   Source has media files: True
   Destination has media files: False
   → Deleting destination (no media files)
+```
+
+### Filename Normalization
+
+Rename media files and related subtitle files to match their parent directory names:
+
+```bash
+# Normalize filenames in current directory
+tidyflix filenames
+
+# Normalize filenames in specific directories
+tidyflix filenames /movies /movies-4k
+
+# Preview changes without applying them
+tidyflix filenames --dry-run
+
+# Disable colored output
+tidyflix filenames --no-color
+```
+
+Example transformations:
+- Directory: `The.Movie.2019`
+- `random_filename.mkv` → `The.Movie.2019.mkv`
+- `random_filename.EN.srt` → `The.Movie.2019.EN.srt`
+- `random_filename.idx` → `The.Movie.2019.idx`
+
+#### Smart Subtitle Handling
+
+The filename normalization feature intelligently handles subtitle files:
+
+- **Language Code Preservation**: Automatically detects and preserves language codes in subtitle filenames
+- **Multiple .srt Protection**: When multiple .srt files exist, none are renamed to avoid conflicts
+- **Supported Extensions**: Handles `.srt`, `.idx`, `.sub`, and `.srr` subtitle files
+- **Dynamic Language Detection**: Works with any language code format (e.g., `en`, `english`, `zh-cn`, `pt-br`)
+
+Example with subtitles:
+```
+Before:
+  messy_filename.mkv
+  messy_filename.en.srt
+  messy_filename.fr.srt    # Multiple .srt files - none will be renamed
+  messy_filename.idx
+  messy_filename.sub
+
+After:
+  The.Movie.2019.mkv       # ✅ Renamed
+  messy_filename.en.srt    # ❌ Skipped (multiple .srt files)
+  messy_filename.fr.srt    # ❌ Skipped (multiple .srt files)
+  The.Movie.2019.idx       # ✅ Renamed
+  The.Movie.2019.sub       # ✅ Renamed
+```
+
+With single .srt file:
+```
+Before:
+  weird_name.mkv
+  weird_name.finnish.srt
+  weird_name.idx
+
+After:
+  The.Movie.2019.mkv
+  The.Movie.2019.finnish.srt  # ✅ Language code preserved
+  The.Movie.2019.idx
 ```
 
 ### File Cleaning
@@ -231,6 +295,16 @@ tidyflix organize [options] [directories...]
 - `--dry-run`: Preview changes without applying them
 - `--no-color`: Disable colored output
 - `-h, --help`: Show help for organize command
+
+### Filenames Subcommand
+```bash
+tidyflix filenames [options] [directories...]
+```
+
+**Options:**
+- `--dry-run`: Preview changes without applying them
+- `--no-color`: Disable colored output
+- `-h, --help`: Show help for filenames command
 
 ## Quality Scoring System
 

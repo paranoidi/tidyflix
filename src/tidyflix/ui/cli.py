@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from tidyflix.core.models import Colors
 from tidyflix.filesystem.clean import clean_unwanted_files
 from tidyflix.operations.deletion import show_deletion_confirmation
+from tidyflix.operations.filenames import normalize_filenames
 from tidyflix.operations.normalize import normalize_directories
 from tidyflix.operations.organize import organize_media_files
 from tidyflix.operations.verify import verify_directories_have_media
@@ -84,6 +85,13 @@ class VerifyArgs(BaseCommandArgs):
     """Arguments for verify command."""
 
     delete: bool = False
+
+
+@dataclass
+class FilenamesArgs(BaseCommandArgs):
+    """Arguments for filenames command."""
+
+    dry_run: bool = False
 
 
 def _validate_and_setup_common(args: BaseCommandArgs) -> list[str]:
@@ -369,5 +377,50 @@ def main_verify():
     target_dirs = _validate_and_setup_common(args)
 
     success = verify_directories_have_media(target_directories=target_dirs, delete=args.delete)
+    if not success:
+        sys.exit(1)
+
+
+def parse_filenames_arguments() -> FilenamesArgs:
+    """Parse command line arguments for filenames command."""
+    parser = argparse.ArgumentParser(
+        description="Rename main media files to match their parent directory names.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s                         # Rename files in current directory
+  %(prog)s /movies                 # Rename files in specified path
+  %(prog)s /movies /movies-4k      # Rename files in multiple paths
+  %(prog)s --dry-run               # Preview changes without applying them
+  %(prog)s --no-color              # Disable colored output
+        """,
+    )
+
+    parser.add_argument(
+        "directories",
+        nargs="*",
+        default=["."],
+        help="Directories to process (default: current directory)",
+    )
+
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without actually doing it",
+    )
+
+    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+
+    args = parser.parse_args()
+
+    return FilenamesArgs(directories=args.directories, no_color=args.no_color, dry_run=args.dry_run)
+
+
+def main_filenames():
+    """CLI entry point for filenames command."""
+    args = parse_filenames_arguments()
+    target_dirs = _validate_and_setup_common(args)
+
+    success = normalize_filenames(target_directories=target_dirs, dry_run=args.dry_run)
     if not success:
         sys.exit(1)

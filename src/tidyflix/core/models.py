@@ -19,6 +19,7 @@ class Colors:
     CYAN: str = "\033[96m"
     BLUE: str = "\033[94m"
     BOLD_BLUE: str = "\033[94;1m"
+    BOLD_WHITE: str = "\033[97;1m"
     GREY: str = "\033[2m"  # Dim/faint - should work on most terminals
     RESET: str = "\033[0m"
     # Alias for compatibility
