@@ -7,11 +7,16 @@ into subdirectories based on their filenames.
 
 from __future__ import annotations
 
+import re
 import shutil
 from pathlib import Path
 
 from tidyflix.core.config import MEDIA_EXTENSIONS
 from tidyflix.core.models import Colors
+
+# Regex pattern to match TV show episode filenames (e.g., "S01E01", "S1E1", etc.)
+# Pattern matches: [whitespace or dot]S[1-2 digits]E[1-3 digits][whitespace or dot]
+TV_EPISODE_PATTERN = re.compile(r"[\s\.]S\d{1,2}E\d{1,3}[\s\.]", re.IGNORECASE)
 
 
 def organize_media_files(target_directories: list[str], dry_run: bool = False) -> bool:
@@ -59,6 +64,11 @@ def organize_media_files(target_directories: list[str], dry_run: bool = False) -
 
         # Process each media file
         for file_path in media_files:
+            # Skip files that match TV episode pattern
+            if TV_EPISODE_PATTERN.search(file_path.name):
+                print(f"  {Colors.YELLOW}Skipping TV episode:{Colors.RESET} {file_path.name}")
+                continue
+
             moved = _organize_single_file(file_path, dry_run)
             if moved:
                 total_moved += 1

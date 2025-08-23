@@ -240,7 +240,7 @@ def _normalize_single_directory(subdir_path: Path, dry_run: bool) -> bool:
 
         # Show subtitle renames
         for sub_file, _, new_sub_name in subtitle_renames:
-            if (sub_file.name == new_sub_name):
+            if sub_file.name == new_sub_name:
                 continue
             sub_before_highlighted, sub_after_highlighted = highlight_changes(
                 sub_file.name, new_sub_name
