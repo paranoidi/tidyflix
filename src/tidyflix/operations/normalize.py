@@ -524,8 +524,8 @@ def normalize_directories(
 
             if dry_run:
                 orig_highlighted, new_highlighted = highlight_changes(dir_name, new_dir_name)
-                print(f"  Before: '{orig_highlighted}'")
-                print(f"  After:  '{new_highlighted}'")
+                print(f"  Before: {orig_highlighted}")
+                print(f"  After : {new_highlighted}")
                 continue
 
             # Check for conflicts
