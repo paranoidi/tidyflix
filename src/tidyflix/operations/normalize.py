@@ -258,8 +258,19 @@ class TitleCaseNormalizer(Normalize):
                 if len(part) <= 4 and part.isupper() and part.isalpha():
                     result_parts.append(part)
                 else:
-                    # Capitalize this word
-                    result_parts.append(part.capitalize())
+                    # Check if word has camelCase/PascalCase pattern (mixed case, not all caps)
+                    has_mixed_case = (
+                        len(part) > 1
+                        and any(c.isupper() for c in part[1:])
+                        and any(c.islower() for c in part)
+                    )
+
+                    if has_mixed_case:
+                        # Word has camelCase/PascalCase pattern, preserve it exactly as-is
+                        result_parts.append(part)
+                    else:
+                        # Capitalize this word normally (includes ALL CAPS words)
+                        result_parts.append(part.capitalize())
 
         return ".".join(result_parts)
 
