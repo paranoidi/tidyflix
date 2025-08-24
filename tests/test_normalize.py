@@ -335,8 +335,8 @@ def test_term_capitalizer():
 
     # Test basic BluRay capitalization (the requested example)
     assert normalizer.normalize("movie.bluray.1080p") == "movie.BluRay.1080p"
-    assert normalizer.normalize("bluray") == "BluRay"
-    assert normalizer.normalize("BLURAY") == "BluRay"
+    assert normalizer.normalize("bluray") == "bluray"  # First word never capitalized
+    assert normalizer.normalize("BLURAY") == "BLURAY"  # First word never capitalized
     assert normalizer.normalize("BluRay") == "BluRay"  # Already correct
 
     # Test video formats

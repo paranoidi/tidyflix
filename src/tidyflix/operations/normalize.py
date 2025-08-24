@@ -333,6 +333,10 @@ class TermCapitalizer(Normalize):
         parts = result.split(".")
 
         for i, part in enumerate(parts):
+            # Skip the first word (index 0) - never capitalize it
+            if i == 0:
+                continue
+
             # Check each term capitalization pair
             for lowercase_term, preferred_cap in self.TERM_CAPITALIZATIONS:
                 if part.lower() == lowercase_term.lower():
