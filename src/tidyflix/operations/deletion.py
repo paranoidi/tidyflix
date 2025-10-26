@@ -29,15 +29,20 @@ def show_deletion_confirmation(to_delete: list[str]):
     total_mb = total_bytes / (1024 * 1024)
     print(f"\n{Colors.GREEN}Total space to free: {total_mb:.2f} MB{Colors.RESET}")
 
-    confirm = input("\nConfirm deletion? (yes/no): ").strip().lower()
-    if confirm in ["yes", "y"]:
-        print("\nDeleting directories...")
-        for d in to_delete:
-            try:
-                shutil.rmtree(d)
-                print(f"Deleted: {os.path.basename(d)}")
-            except Exception as e:
-                print(f"Error deleting {os.path.basename(d)}: {e}")
-        print(f"\nDeletion complete. {len(to_delete)} directories processed.")
-    else:
-        print("Deletion cancelled.")
+    while true:
+        confirm = input("\nConfirm deletion? (y/n): ").strip().lower()
+        if confirm in ["yes", "y"]:
+            print("\nDeleting directories...")
+            for d in to_delete:
+                try:
+                    shutil.rmtree(d)
+                    print(f"Deleted: {os.path.basename(d)}")
+                except Exception as e:
+                    print(f"Error deleting {os.path.basename(d)}: {e}")
+            print(f"\nDeletion complete. {len(to_delete)} directories processed.")
+            break
+        elif confirm in ["n", "no"]:
+            print("Deletion cancelled.")
+            break
+        else:
+            print("Please enter valid selection.")
