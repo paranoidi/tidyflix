@@ -29,7 +29,7 @@ def show_deletion_confirmation(to_delete: list[str]):
     total_mb = total_bytes / (1024 * 1024)
     print(f"\n{Colors.GREEN}Total space to free: {total_mb:.2f} MB{Colors.RESET}")
 
-    while true:
+    while True:
         confirm = input("\nConfirm deletion? (y/n): ").strip().lower()
         if confirm in ["yes", "y"]:
             print("\nDeleting directories...")
