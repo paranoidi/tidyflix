@@ -13,6 +13,7 @@ from collections.abc import Callable
 
 from tidyflix.core.models import DirectoryInfo, DuplicateGroup
 from tidyflix.filesystem.scanner import scan_directory_info
+from tidyflix.processing.duplicate_detector import parse_prefix
 
 
 class BackgroundScanner:
@@ -78,7 +79,13 @@ class BackgroundScanner:
                 # Initial sort by size (largest first) - will be re-sorted by score later
                 scanned_dirs.sort(key=lambda x: x.size_bytes or 0, reverse=True)  # pyright: ignore[reportUnknownLambdaType]
 
-                group = DuplicateGroup(prefix, scanned_dirs)
+                # Extract original prefix from first directory for display
+                # The prefix parameter is normalized (lowercase), but we want the original capitalization
+                original_prefix = parse_prefix(scanned_dirs[0].name)
+                # Fallback to normalized prefix if parse_prefix returns None (shouldn't happen)
+                display_prefix = original_prefix if original_prefix else prefix
+
+                group = DuplicateGroup(display_prefix, scanned_dirs)
                 group.calculate_size_info()
 
                 # Put the ready group in the queue

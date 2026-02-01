@@ -27,6 +27,7 @@ def discover_duplicates(target_dirs: list[str]) -> dict[str, list[DirectoryInfo]
     )
 
     # Collect all directories and group by prefix (lightweight pass)
+    # Use lowercase normalized prefix as key for case-insensitive grouping
     prefix_groups: defaultdict[str, list[DirectoryInfo]] = defaultdict(list)
 
     for target_dir in target_dirs:
@@ -41,14 +42,19 @@ def discover_duplicates(target_dirs: list[str]) -> dict[str, list[DirectoryInfo]
 
                     prefix = parse_prefix(dir_info.name)
                     if prefix:
-                        prefix_groups[prefix].append(dir_info)
+                        # Normalize to lowercase for case-insensitive grouping
+                        normalized_prefix = prefix.lower()
+                        prefix_groups[normalized_prefix].append(dir_info)
         except (PermissionError, OSError) as e:
             print(f"Warning: Cannot access directory {target_dir}: {e}")
             continue
 
     # Filter to only groups with duplicates
+    # Return with normalized keys, but store original prefixes for later use
     duplicate_groups: dict[str, list[DirectoryInfo]] = {
-        prefix: dlist for prefix, dlist in prefix_groups.items() if len(dlist) > 1
+        normalized_prefix: dlist
+        for normalized_prefix, dlist in prefix_groups.items()
+        if len(dlist) > 1
     }
 
     if not duplicate_groups:
